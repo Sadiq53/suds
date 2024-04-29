@@ -1,14 +1,20 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import Header from '../shared/Header'
 import Footer from '../shared/Footer'
 import {useFormik} from 'formik'
 import axios from 'axios'
 import { API_URL } from '../../utils/API'
+import OpenAccountSchema from '../../schemas/OpenAccountSchema'
+import { useNavigate } from 'react-router-dom'
 
 const OpenAcount = () => {
 
+    let modal = useRef();
+    let [showAlert, setShowAlert] = useState(false);
+    let [alertMsg, setAlertMsg] = useState(""); 
+    let navigate = useNavigate();
     let openAccount = useFormik({
-        // validationSchema : ,
+        validationSchema : OpenAccountSchema,
         initialValues : {
             fullname : "",
             account_type : "",
@@ -23,13 +29,34 @@ const OpenAcount = () => {
             secondary_address : "",
             city : "",
             state : "",
-            country : ""
+            country : "",
+            monthly_income : ""
         },
         onSubmit : async(formData)=>{
             let ID = localStorage.getItem('Naruto')
             let response = await axios.put(`${API_URL}`, formData, {headers : {Authorization : ID}})
             if(response.data.status === 200){
-
+                navigate(`/auth/home`)
+            }else if(response.data.status === 404){
+                setShowAlert(true);
+                    setAlertMsg("Error 404!")
+                    setTimeout(()=>{
+                        setShowAlert(false)
+                    }, 3000);
+            }else if(response.data.status === 403){
+                if(response.data.errType === 1){
+                    setShowAlert(true);
+                    setAlertMsg("Error 403! account not found")
+                    setTimeout(()=>{
+                        setShowAlert(false)
+                    }, 3000);
+                }else if(response.data.errType === 2){
+                    setShowAlert(true);
+                    setAlertMsg("Invalid Email Address")
+                    setTimeout(()=>{
+                        setShowAlert(false)
+                    }, 3000);
+                }
             }
         }
     })
@@ -87,14 +114,17 @@ const OpenAcount = () => {
                     name='fullname'
                     onChange={openAccount.handleChange}
                     placeholder="Full name"
-                    className="form-control"
+                    className={`form-control ${openAccount.errors.fullname && openAccount.touched.fullname ? ' is-invalid' : ''}`}
                     />
                 </div>
+                    {/* {
+                        openAccount.errors.fullname && openAccount.touched.fullname ? <small className='text-danger'>{openAccount.errors.fullname}</small> : null
+                    } */}
                 </div>
                 <div className="col-lg-6 col-md-6">
                 <div className="form-group">
                     <label>Account type</label>
-                    <select name='account_type' onChange={openAccount.handleChange} className='form-control'>
+                    <select name='account_type' onChange={openAccount.handleChange} className={`form-control ${openAccount.errors.account_type && openAccount.touched.account_type ? ' is-invalid' : ''}`}>
                     <option value="">Please select</option>
                     <option value="Online banking">Online banking</option>
                     <option value="Online investing">Online investing</option>
@@ -113,14 +143,15 @@ const OpenAcount = () => {
                     onChange={openAccount.handleChange}
                     name='dob'
                     placeholder="dd/mm/yy"
-                    className="form-control"
+                    className={`form-control ${openAccount.errors.dob && openAccount.touched.dob ? ' is-invalid' : ''}`}
                     />
                 </div>
                 </div>
                 <div className="col-lg-6 col-md-6">
                 <div className="form-group">
                     <label>Gender</label>
-                    <select onChange={openAccount.handleChange} name='gender' className='form-control'>
+                    <select onChange={openAccount.handleChange} name='gender' className={`form-control ${openAccount.errors.gender && openAccount.touched.gender ? ' is-invalid' : ''}`}>
+                    <option value="">Select</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     </select>
@@ -165,7 +196,7 @@ const OpenAcount = () => {
                     type="text"
                     onChange={openAccount.handleChange} name='nationality'
                     placeholder="Nationality"
-                    className="form-control"
+                    className={`form-control ${openAccount.errors.nationality && openAccount.touched.nationality ? ' is-invalid' : ''}`}
                     />
                 </div>
                 </div>
@@ -216,17 +247,28 @@ const OpenAcount = () => {
                     type="text"
                     onChange={openAccount.handleChange} name='phone_no'
                     placeholder="Mobile number"
-                    className="form-control"
+                    className={`form-control ${openAccount.errors.phone_no && openAccount.touched.phone_no ? ' is-invalid' : ''}`}
                     />
                 </div>
                 </div>
-                <div className="col-lg-12 col-md-12">
+                <div className="col-lg-6 col-md-6">
                 <div className="form-group">
                     <label>Email address</label>
                     <input
                     type="text"
                     onChange={openAccount.handleChange} name='email'
                     placeholder="Email address"
+                    className={`form-control ${openAccount.errors.email && openAccount.touched.email ? ' is-invalid' : ''}`}
+                    />
+                </div>
+                </div>
+                <div className="col-lg-6 col-md-6">
+                <div className="form-group">
+                    <label>Monthly Income</label>
+                    <input
+                    type="text"
+                    onChange={openAccount.handleChange} name='monthly_income'
+                    placeholder="Monthly Income"
                     className="form-control"
                     />
                 </div>
@@ -240,7 +282,7 @@ const OpenAcount = () => {
                         type="text"
                         onChange={openAccount.handleChange} name='address'
                         placeholder="Street address"
-                        className="form-control"
+                        className={`form-control ${openAccount.errors.address && openAccount.touched.address ? ' is-invalid' : ''}`}
                         />
                     </div>
                     </div>
@@ -260,7 +302,7 @@ const OpenAcount = () => {
                         type="text"
                         onChange={openAccount.handleChange} name='city'
                         placeholder="City"
-                        className="form-control"
+                        className={`form-control ${openAccount.errors.city && openAccount.touched.city ? ' is-invalid' : ''}`}
                         />
                     </div>
                     </div>
@@ -270,7 +312,7 @@ const OpenAcount = () => {
                         type="text"
                         onChange={openAccount.handleChange} name='state'
                         placeholder="State / Province"
-                        className="form-control"
+                        className={`form-control ${openAccount.errors.state && openAccount.touched.state ? ' is-invalid' : ''}`}
                         />
                     </div>
                     </div>
@@ -285,7 +327,7 @@ const OpenAcount = () => {
                     </div> */}
                     <div className="col-lg-12">
                     <div className="form-group">
-                        <select onChange={openAccount.handleChange} name='country' className='form-control'>
+                        <select onChange={openAccount.handleChange} name='country' className={`form-control ${openAccount.errors.country && openAccount.touched.country ? ' is-invalid' : ''}`}>
                         <option value="">Country</option>
                         <option value="India">India</option>
                         <option value="England">England</option>
@@ -337,6 +379,19 @@ const OpenAcount = () => {
 
 
         <Footer />
+
+
+        {/* <button onClick={()=>{modal.click()}} > ok</button> */}
+        <input type='button' hidden="true" ref={modal}  data-bs-toggle="modal" data-bs-target="#Open" />
+        <div className="modal fade" id="Open" tabIndex="-1" >
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-body">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
     </>
     
   )

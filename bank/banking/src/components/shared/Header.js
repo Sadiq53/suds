@@ -30,9 +30,9 @@ const Header = () => {
                     </a>
                     <div className="collapse navbar-collapse mean-menu">
                         <ul className="navbar-nav">
-                            <li className="nav-item"><NavLink to="/home" className="nav-link">Home</NavLink></li>
+                            <li className="nav-item"><NavLink to="/auth/home" className="nav-link">Home</NavLink></li>
 
-                            <li className="nav-item"><a href="#" className="nav-link">About Us </a></li>
+                            <li className="nav-item"><NavLink to="/auth/myaccount-login" className="nav-link">My Account </NavLink></li>
 
                             <li className="nav-item"><a href="#" className="nav-link">Portfolio <i
                                         className='las la-angle-down'></i></a>

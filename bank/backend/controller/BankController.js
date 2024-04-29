@@ -45,6 +45,23 @@ route.post("/signup", async(req, res)=>{
     }
 })
 
+route.get("/", async(req, res)=>{
+    if(req.headers.authorization){
+        let token = req.headers.authorization;
+        let ID = jwt.decode(token, key);
+        let userData = await bankSignup.find({_id : ID.id})
+        if(userData?.length != 0){
+            let mpin = userData[0]?.mpin
+            let name = userData[0]?.username
+            if(mpin.length != 0){
+                res.send({ success : true, username : name })
+            }else{
+                res.send({ success : false, username : name })
+            }
+        }
+    }
+})
+
 route.post("/login", async(req, res)=>{
     let Email = req.body.email;
     let Password = sha(req.body.password);
@@ -66,12 +83,16 @@ route.put("/", async(req, res)=>{
     if(req.headers.authorization){
         let token = req.headers.authorization;
         let ID = jwt.decode(token, key);
-        console.log(ID.id)
-        return;
+        // console.log(ID.id)
+        // return;
         let user = await bankSignup.find({_id : ID.id})
         if(user?.length != 0){
-            await bankSignup.updateMany({_id : ID.id}, {$set : req.body})
-            res.send({ status : 200, errType : 0 })
+            if(user[0]?.email === req.body.email){
+                await bankSignup.updateMany({_id : ID.id}, {$set : req.body})
+                res.send({ status : 200, errType : 0 })
+            }else{
+                res.send({ status : 403, errType : 2 })
+            }
         }else{
             res.send({ status : 403, errType : 1 })
         }
